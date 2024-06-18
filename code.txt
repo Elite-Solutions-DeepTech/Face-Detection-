@@ -1,0 +1,58 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from google.colab import files
+uploaded=files.upload()
+df=pd.read_csv('loan.csv')
+df.head(10)
+df.shape
+df.columns
+df.isna().sum()
+null_num_columns=['Gender','Dependents','Self_Employed','LoanAmount','Loan_Amount_Term','Credit_History']
+for col in null_num_columns:
+df[col].fillna(df[col].mode()[0],inplace=True)
+df.isna().sum()
+df.dtypes
+df.columns
+x=df.iloc[:,:-1]
+y=df.iloc[:,-1]
+from sklearn.preprocessing import LabelEncoder
+labelencoder = LabelEncoder()
+column_to_encode=['Loan_ID', 'Gender', 'Married', 'Dependents', 'Education',
+       'Self_Employed','Property_Area','Loan_Status']
+for col in column_to_encode:
+  df[col]= labelencoder.fit_transform(df[col])
+df.dtypes
+from sklearn.model_selection import train_test_split
+train, test = train_test_split(df, train_size=0.75)
+x_train = train.drop(['Loan_Status'],axis=1)
+y_train = train['Loan_Status']
+x_test = test.drop(['Loan_Status'],axis=1)
+y_test = test['Loan_Status']
+ from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score,confusion_matrix
+%matplotlib inline
+model = RandomForestClassifier(n_estimators=100)
+model.fit(x_train,y_train)
+model.score(x_test, y_test)
+y_pred = model.predict(x_test)
+from sklearn.metrics import accuracy_score
+threshold = 0.5  # Choose an appropriate threshold
+y_pred_binary = (y_pred > threshold).astype(int)
+accuracy = accuracy_score(y_test, y_pred_binary)
+print(accuracy)
+plt.scatter(y_test,y_pred,color='red')
+plt.plot([y_test.min(),y_test.max()],[y_test.min(),y_test.max()],color='blue',linewidth=3)
+plt.show()
+#plot outputs
+plt.figure(figsize=(10,7))
+plt.scatter(y_test,y_pred,color='red',alpha=0.5)
+plt.plot([y_test.min(),y_test.max()],[y_test.min(),y_test.max()],color='blue',linewidth=3)
+plt.xlabel('Actual')
+plt.ylabel('predicted')
+plt.title('Actual vs predicted Loan Eligibility')
+plt.grid('True')
+plt.show()
+
+
